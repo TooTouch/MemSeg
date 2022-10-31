@@ -1,0 +1,5 @@
+anomalib
+opencv
+einops
+timm
+wandb

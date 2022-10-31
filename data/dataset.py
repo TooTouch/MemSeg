@@ -54,6 +54,9 @@ class MemSegDataset(Dataset):
                 std  = (0.229, 0.224, 0.225)
             )
         ])
+
+        # sythetic anomaly switch
+        self.anomaly_switch = False
         
     def __getitem__(self, idx):
         
@@ -78,11 +81,14 @@ class MemSegDataset(Dataset):
             mask = cv2.resize(mask, dsize=self.resize).astype(np.bool).astype(np.int)
 
         ## anomaly source
-        p = np.random.uniform()
-        if self.train and p > 0.5 and not self.to_memory:
-            img, mask = self.generate_anomaly(img=img)
-            target = 1
-        
+        if not self.to_memory and self.train:
+            if self.anomaly_switch:
+                img, mask = self.generate_anomaly(img=img)
+                target = 1
+                self.anomaly_switch = False
+            else:        
+                self.anomaly_switch = True
+            
         # convert ndarray into tensor
         img = self.transform(img)
         mask = torch.Tensor(mask).to(torch.int64)

@@ -37,7 +37,6 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
 
     batch_time_m = AverageMeter()
     data_time_m = AverageMeter()
-    acc_m = AverageMeter()
     losses_m = AverageMeter()
     l1_losses_m = AverageMeter()
     focal_losses_m = AverageMeter()

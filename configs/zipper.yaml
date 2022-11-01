@@ -4,7 +4,7 @@ SEED: 42
 DATASET:
   datadir: '/datasets/MVTec'
   texture_source_dir: '/datasets/dtd/images'
-  target: 'capsule'
+  target: 'zipper'
   resize: !!python/tuple
     - 256 # height
     - 256 # width

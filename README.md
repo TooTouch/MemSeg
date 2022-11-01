@@ -43,14 +43,8 @@ python main.py --yaml_config ./configs/capsule.yaml
 ## Demo
 
 ```
-voila "[demo] model inference.ipynb"
+voila "[demo] model inference.ipynb" --port ${port} --Voila.ip ${ip}
 ```
-
-# Results
-
-Class | AUROC image | AUROC pixel | AUPRO
----|---|---|---
-capsule | 0.9214 | 0.8257 | 0.8185
 
 
 # Citation

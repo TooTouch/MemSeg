@@ -46,6 +46,23 @@ python main.py --yaml_config ./configs/capsule.yaml
 voila "[demo] model inference.ipynb" --port ${port} --Voila.ip ${ip}
 ```
 
+![](https://github.com/TooTouch/MemSeg/blob/main/assets/memseg.gif)
+
+# Results
+
+TBD
+
+|    | target    |   AUROC-image |   AUROC-pixel |   AUPRO-pixel |
+|---:|:----------|--------------:|--------------:|--------------:|
+|  0 | leather   |        100    |         93.93 |         90.44 |
+|  1 | carpet    |         91.33 |         91.32 |         78.34 |
+|  2 | capsule   |         95.77 |         88.55 |         81.56 |
+|  3 | cable     |         92.41 |         81.77 |         64.45 |
+|  4 | metal_nut |         99.9  |         71.13 |         79.92 |
+|  5 | grid      |         96.57 |         76.78 |         59.63 |
+|  6 | bottle    |         99.92 |         95    |         89.95 |
+|  7 | hazelnut  |         95.29 |         91.73 |         87.83 |
+|    | **Average**   |         96.4  |         86.28 |         79.01 |
 
 # Citation
 

@@ -149,6 +149,9 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
                 train_mode = False
                 break
 
+    # print best score and step
+    _logger.info('Best Metric: {0:.3%} (step {1:})'.format(best_score, state['best_step']))
+
     # save latest model
     torch.save(model.state_dict(), os.path.join(savedir, f'latest_model.pt'))
 
@@ -157,7 +160,7 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
     state.update(eval_log)
     json.dump(state, open(os.path.join(savedir, 'latest_score.json'),'w'), indent='\t')
 
-    _logger.info('Best Metric: {0:.3%} (step {1:})'.format(best_score, state['best_step']))
+    
     
 
         

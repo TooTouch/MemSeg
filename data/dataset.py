@@ -65,7 +65,7 @@ class MemSegDataset(Dataset):
         # image
         img = cv2.imread(file_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, dsize=self.resize)
+        img = cv2.resize(img, dsize=(self.resize[1], self.resize[0]))
         
         # target
         target = 0 if 'good' in self.file_list[idx] else 1
@@ -78,7 +78,7 @@ class MemSegDataset(Dataset):
                 file_path.replace('test','ground_truth').replace('.png','_mask.png'), 
                 cv2.IMREAD_GRAYSCALE
             )
-            mask = cv2.resize(mask, dsize=self.resize).astype(np.bool).astype(np.int)
+            mask = cv2.resize(mask, dsize=(self.resize[1], self.resize[0])).astype(np.bool).astype(np.int)
 
         ## anomaly source
         if not self.to_memory and self.train:
@@ -208,7 +208,7 @@ class MemSegDataset(Dataset):
         idx = np.random.choice(len(self.texture_source_file_list))
         texture_source_img = cv2.imread(self.texture_source_file_list[idx])
         texture_source_img = cv2.cvtColor(texture_source_img, cv2.COLOR_BGR2RGB)
-        texture_source_img = cv2.resize(texture_source_img, dsize=self.resize).astype(np.float32)
+        texture_source_img = cv2.resize(texture_source_img, dsize=(self.resize[1], self.resize[0])).astype(np.float32)
         
         return texture_source_img
         
@@ -216,8 +216,8 @@ class MemSegDataset(Dataset):
         structure_source_img = self.rand_augment()(image=img)
         
         assert self.resize[0] % self.structure_grid_size == 0, 'structure should be devided by grid size accurately'
-        grid_w = self.resize[0] // self.structure_grid_size
-        grid_h = self.resize[1] // self.structure_grid_size
+        grid_w = self.resize[1] // self.structure_grid_size
+        grid_h = self.resize[0] // self.structure_grid_size
         
         structure_source_img = rearrange(
             tensor  = structure_source_img, 

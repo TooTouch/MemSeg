@@ -41,6 +41,11 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
     l1_losses_m = AverageMeter()
     focal_losses_m = AverageMeter()
     
+    # metrics
+    auroc_image_metric = AUROC(num_classes=1, pos_label=1)
+    auroc_pixel_metric = AUROC(num_classes=1, pos_label=1)
+    aupro_pixel_metric = AUPRO()
+
     # criterion
     l1_criterion, focal_criterion = criterion
     l1_weight, focal_weight = loss_weights
@@ -114,7 +119,14 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
 
 
             if ((step+1) % eval_interval == 0 and step != 0) or (step+1) == num_training_steps: 
-                eval_metrics = evaluate(model, validloader, criterion, log_interval, device)
+                eval_metrics = evaluate(
+                    model        = model, 
+                    dataloader   = validloader, 
+                    criterion    = criterion, 
+                    log_interval = log_interval,
+                    metrics      = [auroc_image_metric, auroc_pixel_metric, aupro_pixel_metric], 
+                    device       = device
+                )
                 model.train()
 
                 eval_log = dict([(f'eval_{k}', v) for k, v in eval_metrics.items()])
@@ -161,13 +173,15 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
     json.dump(state, open(os.path.join(savedir, 'latest_score.json'),'w'), indent='\t')
 
     
-    
 
         
-def evaluate(model, dataloader, criterion, log_interval, device='cpu'):
-    auroc_image_metric = AUROC(num_classes=1, pos_label=1)
-    auroc_pixel_metric = AUROC(num_classes=1, pos_label=1)
-    aupro_pixel_metric = AUPRO()
+def evaluate(model, dataloader, criterion, log_interval, metrics: list, device: str = 'cpu'):
+    
+    # metrics
+    auroc_image_metric, auroc_pixel_metric, aupro_pixel_metric = metrics
+
+    # reset
+    auroc_image_metric.reset(); auroc_pixel_metric.reset(); aupro_pixel_metric.reset()
 
     model.eval()
     with torch.no_grad():
@@ -203,5 +217,6 @@ def evaluate(model, dataloader, criterion, log_interval, device='cpu'):
 
     _logger.info('TEST: AUROC-image: %.3f%% | AUROC-pixel: %.3f%% | AUPRO-pixel: %.3f%%' % 
                 (metrics['AUROC-image'], metrics['AUROC-pixel'], metrics['AUPRO-pixel']))
+
 
     return metrics

@@ -6,11 +6,11 @@ Unofficial Re-implementation for [MemSeg: A semi-supervised method for image sur
 - Docker image: nvcr.io/nvidia/pytorch:20.12-py3
 
 ```
-anomalib
-opencv
-einops
-timm
-wandb
+anomalib==0.3.7
+opencv-python==4.6.0
+einops==0.5.0
+timm==0.5.4
+wandb==0.12.17
 ```
 
 

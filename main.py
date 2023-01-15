@@ -97,7 +97,7 @@ def run(cfg):
 
 
     # build feature extractor
-    feature_extractor = feature_extractor = create_model(
+    feature_extractor = create_model(
         cfg['MODEL']['feature_extractor_name'], 
         pretrained    = True, 
         features_only = True

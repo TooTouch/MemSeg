@@ -168,7 +168,7 @@ def run(cfg):
 
 
 if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Fake News Detection - Task1')
+    parser = argparse.ArgumentParser(description='MemSeg')
     parser.add_argument('--yaml_config', type=str, default=None, help='exp config file')    
 
     args = parser.parse_args()

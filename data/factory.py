@@ -3,16 +3,17 @@ from typing import Tuple, List
 from .dataset import MemSegDataset
 
 def create_dataset(
-    datadir: str, target: str, train: bool, to_memory: bool = False,
-    resize: Tuple[int, int] = (224,224),
+    datadir: str, target: str, is_train: bool, to_memory: bool = False,
+    resize: Tuple[int, int] = (256,256),
     texture_source_dir: str = None, structure_grid_size: str = 8,
     transparency_range: List[float] = [0.15, 1.],
     perlin_scale: int = 6, min_perlin_scale: int = 0, perlin_noise_threshold: float = 0.5,
+    use_mask: bool = True, bg_threshold: float = 100, bg_reverse: bool = False
 ):
     dataset = MemSegDataset(
         datadir                = datadir,
         target                 = target, 
-        train                  = train,
+        is_train               = is_train,
         to_memory              = to_memory,
         resize                 = resize,
         texture_source_dir     = texture_source_dir, 
@@ -21,6 +22,9 @@ def create_dataset(
         perlin_scale           = perlin_scale, 
         min_perlin_scale       = min_perlin_scale, 
         perlin_noise_threshold = perlin_noise_threshold,
+        use_mask               = use_mask,
+        bg_threshold           = bg_threshold,
+        bg_reverse             = bg_reverse
     )
 
     return dataset

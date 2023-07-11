@@ -10,41 +10,65 @@ import torchvision.transforms as transforms
 import imgaug.augmenters as iaa
 
 from data import rand_perlin_2d_np
-from utils import torch_seed
 
-from typing import Union, List, Tuple
+from typing import List, Tuple
+
+import cv2
+import os
+import numpy as np
+from glob import glob
+from einops import rearrange
+
+import torch
+from torchvision import transforms
+from torch.utils.data import Dataset
+import imgaug.augmenters as iaa
+
+from .perlin import rand_perlin_2d_np
+
+from typing import List, Tuple
 
 
 
 class MemSegDataset(Dataset):
     def __init__(
-        self, datadir: str, target: str, train: bool, to_memory: bool = False,
-        resize: Tuple[int, int] = (224,224),
+        self, datadir: str, target: str, is_train: bool, to_memory: bool = False, 
+        resize: Tuple[int, int] = (224,224), 
         texture_source_dir: str = None, structure_grid_size: str = 8,
         transparency_range: List[float] = [0.15, 1.],
         perlin_scale: int = 6, min_perlin_scale: int = 0, perlin_noise_threshold: float = 0.5,
+        use_mask: bool = True, bg_threshold: float = 100, bg_reverse: bool = False
     ):
         # mode
-        self.train = train 
+        self.is_train = is_train 
         self.to_memory = to_memory
 
         # load image file list
         self.datadir = datadir
         self.target = target
-        self.file_list = glob(os.path.join(self.datadir, self.target, 'train/*/*' if train else 'test/*/*'))
+        self.file_list = glob(os.path.join(self.datadir, self.target, 'train/*/*' if is_train else 'test/*/*'))
         
-        # load texture image file list
-        if texture_source_dir:
-            self.texture_source_file_list = glob(os.path.join(texture_source_dir,'*/*'))
-            
         # synthetic anomaly
-        if train:
-            self.transparency_range = transparency_range
+        if self.is_train and not self.to_memory:
+            # load texture image file list    
+            self.texture_source_file_list = glob(os.path.join(texture_source_dir,'*/*')) if texture_source_dir else None
+        
+            # perlin noise
             self.perlin_scale = perlin_scale
             self.min_perlin_scale = min_perlin_scale
             self.perlin_noise_threshold = perlin_noise_threshold
+            
+            # structure
             self.structure_grid_size = structure_grid_size
-        
+            
+            # anomaly mixing
+            self.transparency_range = transparency_range
+            
+            # mask setting
+            self.use_mask = use_mask
+            self.bg_threshold = bg_threshold
+            self.bg_reverse = bg_reverse
+            
         # transform ndarray into tensor
         self.resize = resize
         self.transform = transforms.Compose([
@@ -54,6 +78,7 @@ class MemSegDataset(Dataset):
                 std  = (0.229, 0.224, 0.225)
             )
         ])
+        
 
         # sythetic anomaly switch
         self.anomaly_switch = False
@@ -81,9 +106,9 @@ class MemSegDataset(Dataset):
             mask = cv2.resize(mask, dsize=(self.resize[1], self.resize[0])).astype(np.bool).astype(np.int)
 
         ## anomaly source
-        if not self.to_memory and self.train:
+        if self.is_train and not self.to_memory:
             if self.anomaly_switch:
-                img, mask = self.generate_anomaly(img=img)
+                img, mask = self.generate_anomaly(img=img, texture_img_list=self.texture_source_file_list)
                 target = 1
                 self.anomaly_switch = False
             else:        
@@ -119,7 +144,7 @@ class MemSegDataset(Dataset):
         
         return aug
         
-    def generate_anomaly(self, img: np.ndarray) -> List[np.ndarray]:
+    def generate_anomaly(self, img: np.ndarray, texture_img_list: list = None) -> List[np.ndarray]:
         '''
         step 1. generate mask
             - target foreground mask
@@ -137,7 +162,10 @@ class MemSegDataset(Dataset):
         # step 1. generate mask
         
         ## target foreground mask
-        target_foreground_mask = self.generate_target_foreground_mask(img=img)
+        if self.use_mask:
+            target_foreground_mask = self.generate_target_foreground_mask(img=img)
+        else:
+            target_foreground_mask = np.ones(self.resize)
         
         ## perlin noise mask
         perlin_noise_mask = self.generate_perlin_noise_mask()
@@ -149,7 +177,7 @@ class MemSegDataset(Dataset):
         # step 2. generate texture or structure anomaly
         
         ## anomaly source
-        anomaly_source_img = self.anomaly_source(img=img)
+        anomaly_source_img = self.anomaly_source(img=img, texture_img_list=texture_img_list)
         
         ## mask anomaly parts
         factor = np.random.uniform(*self.transparency_range, size=1)[0]
@@ -165,11 +193,14 @@ class MemSegDataset(Dataset):
         img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         
         # generate binary mask of gray scale image
-        _, target_background_mask = cv2.threshold(img_gray, 100, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        _, target_background_mask = cv2.threshold(img_gray, self.bg_threshold, 255, cv2.THRESH_BINARY)
         target_background_mask = target_background_mask.astype(np.bool).astype(np.int)
 
         # invert mask for foreground mask
-        target_foreground_mask = -(target_background_mask - 1)
+        if self.bg_reverse:
+            target_foreground_mask = target_background_mask
+        else:
+            target_foreground_mask = -(target_background_mask - 1)
         
         return target_foreground_mask
     
@@ -194,19 +225,18 @@ class MemSegDataset(Dataset):
         
         return mask_noise
     
-    def anomaly_source(self, img: np.ndarray) -> np.ndarray:
-        p = np.random.uniform()
+    def anomaly_source(self, img: np.ndarray, texture_img_list: list = None) -> np.ndarray:
+        p = np.random.uniform() if texture_img_list else 1.0
         if p < 0.5:
-            # TODO: None texture_source_file_list
-            anomaly_source_img = self._texture_source()
+            idx = np.random.choice(len(texture_img_list))
+            anomaly_source_img = self._texture_source(texture_img_path=texture_img_list[idx])
         else:
             anomaly_source_img = self._structure_source(img=img)
             
         return anomaly_source_img
         
-    def _texture_source(self) -> np.ndarray:
-        idx = np.random.choice(len(self.texture_source_file_list))
-        texture_source_img = cv2.imread(self.texture_source_file_list[idx])
+    def _texture_source(self, texture_img_path: str) -> np.ndarray:
+        texture_source_img = cv2.imread(texture_img_path)
         texture_source_img = cv2.cvtColor(texture_source_img, cv2.COLOR_BGR2RGB)
         texture_source_img = cv2.resize(texture_source_img, dsize=(self.resize[1], self.resize[0])).astype(np.float32)
         
@@ -240,3 +270,4 @@ class MemSegDataset(Dataset):
     def __len__(self):
         return len(self.file_list)
     
+

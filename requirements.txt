@@ -1,5 +1,5 @@
-anomalib==0.3.7
-opencv-python==4.6.0
 einops==0.5.0
 timm==0.5.4
 wandb==0.12.17
+omegaconf
+imgaug==0.4.0

@@ -6,9 +6,9 @@ Unofficial Re-implementation for [MemSeg: A semi-supervised method for image sur
 - Docker image: nvcr.io/nvidia/pytorch:20.12-py3
 
 ```
-einops
-timm==0.6.5
-wandb
+einops==0.5.0
+timm==0.5.4
+wandb==0.12.17
 omegaconf
 imgaug==0.4.0
 ```

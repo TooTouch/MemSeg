@@ -2,10 +2,11 @@ EXP_NAME: MemSeg
 SEED: 42
 
 DATASET:
-  datadir: '/datasets/MVTec'
-  texture_source_dir: '/datasets/dtd/images'
-  target: 'cable'
-  resize: !!python/tuple
+  datadir: /datasets/MVTec
+  texture_source_dir: /datasets/dtd/images
+  anomaly_mask_info: ./anomaly_mask.json
+  target: null
+  resize:
     - 256 # height
     - 256 # width
   structure_grid_size: 8
@@ -24,7 +25,7 @@ MEMORYBANK:
   nb_memory_sample: 30
 
 MODEL:
-  feature_extractor_name: 'resnet18'
+  feature_extractor_name: resnet18
 
 TRAIN:
   batch_size: 8
@@ -49,4 +50,4 @@ LOG:
   eval_interval: 100
 
 RESULT:
-  savedir: './saved_model'
+  savedir: ./saved_model

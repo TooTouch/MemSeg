@@ -158,7 +158,6 @@ def run(cfg):
 
 
 if __name__=='__main__':
-<<<<<<< HEAD
     parser = argparse.ArgumentParser(description='MemSeg for anomaly detection')
     parser.add_argument('--configs', type=str, default=None, help='exp config file')    
     parser.add_argument(
@@ -167,10 +166,6 @@ if __name__=='__main__':
         default=None,
         nargs=argparse.REMAINDER,
     )
-=======
-    parser = argparse.ArgumentParser(description='MemSeg')
-    parser.add_argument('--yaml_config', type=str, default=None, help='exp config file')    
->>>>>>> 11ecc0f0aba2153ad40325bc39a367e0e789c707
 
     args = parser.parse_args()
 

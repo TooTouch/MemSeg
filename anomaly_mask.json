@@ -1,0 +1,77 @@
+{
+    "hazelnut": {
+        "use_mask"     : true,
+        "bg_threshold" : 50,
+        "bg_reverse"   : true
+    },
+    "leather": {
+        "use_mask"     : false,
+        "bg_threshold" : null,
+        "bg_reverse"   : null
+    },
+    "metal_nut": {
+        "use_mask"     : true,
+        "bg_threshold" : 40,
+        "bg_reverse"   : true
+    },
+    "tile": {
+        "use_mask"     : false,
+        "bg_threshold" : null,
+        "bg_reverse"   : null
+    },
+    "wood": {
+        "use_mask"     : false,
+        "bg_threshold" : null,
+        "bg_reverse"   : null
+    },
+    "grid": {
+        "use_mask"     : false,
+        "bg_threshold" : null,
+        "bg_reverse"   : null
+    },
+    "cable": {
+        "use_mask"     : true,
+        "bg_threshold" : 150,
+        "bg_reverse"   : true
+    },
+    "capsule": {
+        "use_mask"     : true,
+        "bg_threshold" : 120,
+        "bg_reverse"   : false
+    },
+    "transistor": {
+        "use_mask"     : true,
+        "bg_threshold" : 90,
+        "bg_reverse"   : false
+    },
+    "carpet": {
+        "use_mask"     : false,
+        "bg_threshold" : null,
+        "bg_reverse"   : null
+    },
+    "bottle": {
+        "use_mask"     : true,
+        "bg_threshold" : 250,
+        "bg_reverse"   : false
+    },
+    "screw": {
+        "use_mask"     : true,
+        "bg_threshold" : 110,
+        "bg_reverse"   : false
+    },
+    "zipper": {
+        "use_mask"     : true,
+        "bg_threshold" : 100,
+        "bg_reverse"   : false
+    },
+    "pill": {
+        "use_mask"     : true,
+        "bg_threshold" : 100,
+        "bg_reverse"   : true
+    },
+    "toothbrush": {
+        "use_mask"     : true,
+        "bg_threshold" : 30,
+        "bg_reverse"   : true
+    }
+}

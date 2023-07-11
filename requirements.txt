@@ -1,5 +1,5 @@
-anomalib
-opencv
 einops
-timm
+timm==0.6.5
 wandb
+omegaconf
+imgaug==0.4.0

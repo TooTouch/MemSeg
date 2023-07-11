@@ -6,11 +6,11 @@ Unofficial Re-implementation for [MemSeg: A semi-supervised method for image sur
 - Docker image: nvcr.io/nvidia/pytorch:20.12-py3
 
 ```
-anomalib
-opencv
 einops
-timm
+timm==0.6.5
 wandb
+omegaconf
+imgaug==0.4.0
 ```
 
 
@@ -52,22 +52,22 @@ voila "[demo] model inference.ipynb" --port ${port} --Voila.ip ${ip}
 
 TBD
 
-|    | target     |   AUROC-image |   AUROC-pixel |   AUPRO-pixel |
-|---:|:-----------|--------------:|--------------:|--------------:|
-|  0 | leather    |        100    |         93.93 |         90.44 |
-|  1 | wood       |         99.12 |         92.71 |         84.96 |
-|  2 | carpet     |         91.33 |         91.32 |         78.34 |
-|  3 | capsule    |         95.77 |         88.55 |         81.56 |
-|  4 | cable      |         92.41 |         81.77 |         64.45 |
-|  5 | metal_nut  |         99.9  |         71.13 |         79.92 |
-|  6 | tile       |        100    |         98.1  |         95.41 |
-|  7 | grid       |         96.57 |         76.78 |         59.63 |
-|  8 | bottle     |         99.92 |         95    |         89.95 |
-|  9 | zipper     |         97.58 |         93.76 |         83.94 |
-| 10 | transistor |         97.71 |         71.78 |         66.86 |
-| 11 | hazelnut   |         95.29 |         91.73 |         87.83 |
-| 12 | pill       |         83.69 |         91.91 |         72.62 |
-|    | **Average**    |         96.1  |         87.57 |         79.69 |
+| target     |   AUROC-image |   AUROC-pixel |   AUPRO-pixel |
+|:-----------|--------------:|--------------:|--------------:|
+| leather    |        100    |         97.29 |         96.14 |
+| pill       |         93.67 |         92.47 |         84.14 |
+| carpet     |         97.87 |         96.55 |         90.74 |
+| hazelnut   |         99.79 |         93.92 |         92    |
+| tile       |        100    |         98.79 |         97.09 |
+| cable      |         81.22 |         67.08 |         52.64 |
+| transistor |         95.04 |         72.34 |         68.8  |
+| zipper     |         98.74 |         88.33 |         75.87 |
+| metal_nut  |         99.8  |         75.91 |         86.55 |
+| grid       |         99.25 |         95.42 |         89.53 |
+| bottle     |        100    |         95.78 |         90.53 |
+| capsule    |         85.08 |         88.17 |         75.95 |
+| wood       |        100    |         94.79 |         88.61 |
+| **Average**    |         96.19 |         88.99 |         83.74 |
 
 # Citation
 

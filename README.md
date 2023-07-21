@@ -37,7 +37,7 @@ imgaug==0.4.0
 # Run
 
 ```bash
-python main.py --yaml_config ./configs/capsule.yaml
+python main.py --yaml_config ./configs.yaml DATASET.target capsule
 ```
 
 ## Demo

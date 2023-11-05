@@ -173,9 +173,6 @@ def evaluate(model, dataloader, device: str = 'cpu'):
     image_masks = []
     anomaly_score = []
     anomaly_map = []
-    
-    # aupro
-    integration_limit = 0.3
 
     model.eval()
     with torch.no_grad():
@@ -204,9 +201,7 @@ def evaluate(model, dataloader, device: str = 'cpu'):
         anomaly_maps      = anomaly_map,
         ground_truth_maps = image_masks
     )
-
-    aupro = trapezoid(all_fprs, all_pros, x_max=integration_limit)
-    aupro /= integration_limit
+    aupro = trapezoid(all_fprs, all_pros)
     
     metrics = {
         'AUROC-image':auroc_image,

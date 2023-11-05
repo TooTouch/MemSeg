@@ -3,3 +3,5 @@ timm==0.5.4
 wandb==0.12.17
 omegaconf
 imgaug==0.4.0
+ipywidgets==8.1.1
+voila==0.5.5

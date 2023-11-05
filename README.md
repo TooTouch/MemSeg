@@ -39,7 +39,7 @@ imgaug==0.4.0
 **Example**
 
 ```bash
-python main.py configs=configs.yaml DATASET.target=bottle
+python main.py --yaml_config ./configs.yaml DATASET.target capsule
 ```
 
 ## Demo

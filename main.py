@@ -87,7 +87,7 @@ def run(cfg):
 
 
     # build feature extractor
-    feature_extractor = feature_extractor = create_model(
+    feature_extractor = create_model(
         cfg.MODEL.feature_extractor_name, 
         pretrained    = True, 
         features_only = True
@@ -158,26 +158,13 @@ def run(cfg):
 
 
 if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='MemSeg for anomaly detection')
-    parser.add_argument('--configs', type=str, default=None, help='exp config file')    
-    parser.add_argument(
-        "opts",
-        help="Modify config options using the command-line",
-        default=None,
-        nargs=argparse.REMAINDER,
-    )
-
-    args = parser.parse_args()
-
-    # load cfg
+    args = OmegaConf.from_cli()
+    # load default config
     cfg = OmegaConf.load(args.configs)
+    del args['configs']
     
-    # update cfg
-    for k, v in zip(args.opts[0::2], args.opts[1::2]):
-        try:
-            OmegaConf.update(cfg, k, eval(v), merge=True)
-        except:
-            OmegaConf.update(cfg, k, v, merge=True)
+    # merge config with new keys
+    cfg = OmegaConf.merge(cfg, args)
     
     # target cfg
     target_cfg = OmegaConf.load(cfg.DATASET.anomaly_mask_info)

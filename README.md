@@ -36,8 +36,10 @@ imgaug==0.4.0
 
 # Run
 
+**Example**
+
 ```bash
-python main.py --yaml_config ./configs/capsule.yaml
+python main.py configs=configs.yaml DATASET.target=bottle
 ```
 
 ## Demo
@@ -50,24 +52,26 @@ voila "[demo] model inference.ipynb" --port ${port} --Voila.ip ${ip}
 
 # Results
 
-TBD
+- **Backbone**: ResNet18
 
-| target     |   AUROC-image |   AUROC-pixel |   AUPRO-pixel |
-|:-----------|--------------:|--------------:|--------------:|
-| leather    |        100    |         97.29 |         96.14 |
-| pill       |         93.67 |         92.47 |         84.14 |
-| carpet     |         97.87 |         96.55 |         90.74 |
-| hazelnut   |         99.79 |         93.92 |         92    |
-| tile       |        100    |         98.79 |         97.09 |
-| cable      |         81.22 |         67.08 |         52.64 |
-| transistor |         95.04 |         72.34 |         68.8  |
-| zipper     |         98.74 |         88.33 |         75.87 |
-| metal_nut  |         99.8  |         75.91 |         86.55 |
-| grid       |         99.25 |         95.42 |         89.53 |
-| bottle     |        100    |         95.78 |         90.53 |
-| capsule    |         85.08 |         88.17 |         75.95 |
-| wood       |        100    |         94.79 |         88.61 |
-| **Average**    |         96.19 |         88.99 |         83.74 |
+| target         |   AUROC-image |   AUROC-pixel |   AUPRO-pixel |
+|:---------------|--------------:|--------------:|--------------:|
+| leather        |        100    |         98.31 |         99.05 |
+| pill           |         96.21 |         88    |         90.23 |
+| carpet         |         98.72 |         94.1  |         95.31 |
+| hazelnut       |         97.89 |         89.28 |         94.86 |
+| tile           |        100    |         98.97 |         98.84 |
+| cable          |         83.71 |         74.69 |         73.21 |
+| toothbrush     |        100    |         98.67 |         97.13 |
+| transistor     |         92.42 |         75    |         79.41 |
+| zipper         |         99.63 |         93.94 |         93    |
+| metal_nut      |         90.42 |         80.99 |         90.62 |
+| grid           |         99.92 |         96.48 |         95.87 |
+| bottle         |        100    |         94.67 |         92.61 |
+| capsule        |         92.34 |         83.45 |         84.34 |
+| screw          |         81.64 |         83.04 |         82.93 |
+| wood           |         99.74 |         94.9  |         94.45 |
+| **Average**    |         95.51 |         89.63 |         90.79 |
 
 # Citation
 

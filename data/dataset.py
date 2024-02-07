@@ -1,6 +1,7 @@
 import cv2
 import os
 import numpy as np
+from PIL import Image
 from glob import glob
 from einops import rearrange
 
@@ -11,7 +12,7 @@ import imgaug.augmenters as iaa
 
 from data import rand_perlin_2d_np
 
-from typing import List, Tuple
+from typing import List
 
 import cv2
 import os
@@ -26,14 +27,15 @@ import imgaug.augmenters as iaa
 
 from .perlin import rand_perlin_2d_np
 
-from typing import List, Tuple
+from typing import List
 
-
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
 
 class MemSegDataset(Dataset):
     def __init__(
         self, datadir: str, target: str, is_train: bool, to_memory: bool = False, 
-        resize: Tuple[int, int] = (224,224), 
+        resize: List[int] = [256, 256], imagesize: int = 224,
         texture_source_dir: str = None, structure_grid_size: str = 8,
         transparency_range: List[float] = [0.15, 1.],
         perlin_scale: int = 6, min_perlin_scale: int = 0, perlin_noise_threshold: float = 0.5,
@@ -69,16 +71,22 @@ class MemSegDataset(Dataset):
             self.bg_threshold = bg_threshold
             self.bg_reverse = bg_reverse
             
-        # transform ndarray into tensor
-        self.resize = resize
-        self.transform = transforms.Compose([
+        # transform
+        self.resize = list(resize)
+        self.transform_img = [
+            transforms.ToPILImage(),
+            transforms.CenterCrop(imagesize),
             transforms.ToTensor(),
-            transforms.Normalize(
-                mean = (0.485, 0.456, 0.406),
-                std  = (0.229, 0.224, 0.225)
-            )
-        ])
-        
+            transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        ]
+        self.transform_img = transforms.Compose(self.transform_img)
+
+        self.transform_mask = [
+            transforms.ToPILImage(),
+            transforms.CenterCrop(imagesize),
+            transforms.ToTensor(),
+        ]
+        self.transform_mask = transforms.Compose(self.transform_mask)
 
         # sythetic anomaly switch
         self.anomaly_switch = False
@@ -88,9 +96,8 @@ class MemSegDataset(Dataset):
         file_path = self.file_list[idx]
         
         # image
-        img = cv2.imread(file_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, dsize=(self.resize[1], self.resize[0]))
+        img = Image.open(file_path).convert("RGB").resize(self.resize)
+        img = np.array(img)
         
         # target
         target = 0 if 'good' in self.file_list[idx] else 1
@@ -99,24 +106,22 @@ class MemSegDataset(Dataset):
         if 'good' in file_path:
             mask = np.zeros(self.resize, dtype=np.float32)
         else:
-            mask = cv2.imread(
-                file_path.replace('test','ground_truth').replace('.png','_mask.png'), 
-                cv2.IMREAD_GRAYSCALE
-            )
-            mask = cv2.resize(mask, dsize=(self.resize[1], self.resize[0])).astype(np.bool).astype(np.int)
-
+            mask = Image.open(file_path.replace('test','ground_truth').replace('.png','_mask.png')).resize(self.resize)
+            mask = np.array(mask)
+        
         ## anomaly source
         if self.is_train and not self.to_memory:
             if self.anomaly_switch:
                 img, mask = self.generate_anomaly(img=img, texture_img_list=self.texture_source_file_list)
                 target = 1
                 self.anomaly_switch = False
+                
+                mask = torch.Tensor(mask)
             else:        
-                self.anomaly_switch = True
-            
-        # convert ndarray into tensor
-        img = self.transform(img)
-        mask = torch.Tensor(mask).to(torch.int64)
+                self.anomaly_switch = True   
+        
+        img = self.transform_img(img)
+        mask = self.transform_mask(mask).squeeze()
         
         return img, mask, target
         
@@ -160,6 +165,7 @@ class MemSegDataset(Dataset):
         '''
         
         # step 1. generate mask
+        img_size = img.shape[:-1] # H x W
         
         ## target foreground mask
         if self.use_mask:
@@ -168,7 +174,7 @@ class MemSegDataset(Dataset):
             target_foreground_mask = np.ones(self.resize)
         
         ## perlin noise mask
-        perlin_noise_mask = self.generate_perlin_noise_mask()
+        perlin_noise_mask = self.generate_perlin_noise_mask(img_size=img_size)
         
         ## mask
         mask = perlin_noise_mask * target_foreground_mask
@@ -204,13 +210,13 @@ class MemSegDataset(Dataset):
         
         return target_foreground_mask
     
-    def generate_perlin_noise_mask(self) -> np.ndarray:
+    def generate_perlin_noise_mask(self, img_size: tuple) -> np.ndarray:
         # define perlin noise scale
         perlin_scalex = 2 ** (torch.randint(self.min_perlin_scale, self.perlin_scale, (1,)).numpy()[0])
         perlin_scaley = 2 ** (torch.randint(self.min_perlin_scale, self.perlin_scale, (1,)).numpy()[0])
 
-        # generate perlin noise
-        perlin_noise = rand_perlin_2d_np((self.resize[0], self.resize[1]), (perlin_scalex, perlin_scaley))
+        # generate perlin noise        
+        perlin_noise = rand_perlin_2d_np(img_size, (perlin_scalex, perlin_scaley))
         
         # apply affine transform
         rot = iaa.Affine(rotate=(-90, 90))
@@ -229,25 +235,28 @@ class MemSegDataset(Dataset):
         p = np.random.uniform() if texture_img_list else 1.0
         if p < 0.5:
             idx = np.random.choice(len(texture_img_list))
-            anomaly_source_img = self._texture_source(texture_img_path=texture_img_list[idx])
+            img_size = img.shape[:-1] # H x W
+            anomaly_source_img = self._texture_source(img_size=img_size, texture_img_path=texture_img_list[idx])
         else:
             anomaly_source_img = self._structure_source(img=img)
             
         return anomaly_source_img
         
-    def _texture_source(self, texture_img_path: str) -> np.ndarray:
+    def _texture_source(self, img_size: tuple, texture_img_path: str) -> np.ndarray:
         texture_source_img = cv2.imread(texture_img_path)
         texture_source_img = cv2.cvtColor(texture_source_img, cv2.COLOR_BGR2RGB)
-        texture_source_img = cv2.resize(texture_source_img, dsize=(self.resize[1], self.resize[0])).astype(np.float32)
+        texture_source_img = cv2.resize(texture_source_img, dsize=img_size).astype(np.float32)
         
         return texture_source_img
         
     def _structure_source(self, img: np.ndarray) -> np.ndarray:
         structure_source_img = self.rand_augment()(image=img)
         
-        assert self.resize[0] % self.structure_grid_size == 0, 'structure should be devided by grid size accurately'
-        grid_w = self.resize[1] // self.structure_grid_size
-        grid_h = self.resize[0] // self.structure_grid_size
+        img_size = img.shape[:-1] # H x W
+        
+        assert img_size[0] % self.structure_grid_size == 0, 'structure should be devided by grid size accurately'
+        grid_w = img_size[1] // self.structure_grid_size
+        grid_h = img_size[0] // self.structure_grid_size
         
         structure_source_img = rearrange(
             tensor  = structure_source_img, 

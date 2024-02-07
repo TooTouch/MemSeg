@@ -44,6 +44,7 @@ def run(cfg):
         target                 = cfg.DATASET.target, 
         is_train               = True,
         resize                 = cfg.DATASET.resize,
+        imagesize              = cfg.DATASET.imagesize,
         texture_source_dir     = cfg.DATASET.texture_source_dir,
         structure_grid_size    = cfg.DATASET.structure_grid_size,
         transparency_range     = cfg.DATASET.transparency_range,
@@ -60,14 +61,16 @@ def run(cfg):
         target    = cfg.DATASET.target, 
         is_train  = True,
         to_memory = True,
-        resize    = cfg.DATASET.resize
+        resize    = cfg.DATASET.resize,
+        imagesize = cfg.DATASET.imagesize,
     )
 
     testset = create_dataset(
-        datadir  = cfg.DATASET.datadir,
-        target   = cfg.DATASET.target, 
-        is_train = False,
-        resize   = cfg.DATASET.resize
+        datadir   = cfg.DATASET.datadir,
+        target    = cfg.DATASET.target, 
+        is_train  = False,
+        resize    = cfg.DATASET.resize,
+        imagesize = cfg.DATASET.imagesize,
     )
     
     # build dataloader

@@ -6,9 +6,10 @@ DATASET:
   texture_source_dir: /datasets/dtd/images
   anomaly_mask_info: ./anomaly_mask.json
   target: null
-  resize:
-    - 256 # height
-    - 256 # width
+  resize: 
+    - 288
+    - 288
+  imagesize: 256
   structure_grid_size: 8
   transparency_range:
     - 0.15 # under bound

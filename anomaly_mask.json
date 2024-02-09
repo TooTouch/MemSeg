@@ -30,7 +30,7 @@
         "bg_reverse"   : null
     },
     "cable": {
-        "use_mask"     : true,
+        "use_mask"     : false,
         "bg_threshold" : 150,
         "bg_reverse"   : true
     },

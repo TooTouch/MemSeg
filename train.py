@@ -196,7 +196,7 @@ def evaluate(model, dataloader, device: str = 'cpu'):
     anomaly_map = np.array(anomaly_map)
     
     auroc_image = roc_auc_score(image_targets, anomaly_score)
-    auroc_pixel = roc_auc_score(image_masks.reshape(-1), anomaly_map.reshape(-1))
+    auroc_pixel = roc_auc_score(image_masks.reshape(-1).astype(int), anomaly_map.reshape(-1))
     all_fprs, all_pros = compute_pro(
         anomaly_maps      = anomaly_map,
         ground_truth_maps = image_masks

@@ -3,13 +3,13 @@ import json
 import os 
 import wandb
 import logging
-from collections import OrderedDict
 
 import torch
 import torch.nn.functional as F
 import numpy as np
 from typing import List
-from anomalib.utils.metrics import AUPRO, AUROC
+from sklearn.metrics import roc_auc_score
+from metrics import compute_pro, trapezoid
 
 _logger = logging.getLogger('train')
 
@@ -40,11 +40,6 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
     losses_m = AverageMeter()
     l1_losses_m = AverageMeter()
     focal_losses_m = AverageMeter()
-    
-    # metrics
-    auroc_image_metric = AUROC(num_classes=1, pos_label=1)
-    auroc_pixel_metric = AUROC(num_classes=1, pos_label=1)
-    aupro_pixel_metric = AUPRO()
 
     # criterion
     l1_criterion, focal_criterion = criterion
@@ -122,9 +117,6 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
                 eval_metrics = evaluate(
                     model        = model, 
                     dataloader   = validloader, 
-                    criterion    = criterion, 
-                    log_interval = log_interval,
-                    metrics      = [auroc_image_metric, auroc_pixel_metric, aupro_pixel_metric], 
                     device       = device
                 )
                 model.train()
@@ -175,13 +167,12 @@ def training(model, trainloader, validloader, criterion, optimizer, scheduler, n
     
 
         
-def evaluate(model, dataloader, criterion, log_interval, metrics: list, device: str = 'cpu'):
-    
-    # metrics
-    auroc_image_metric, auroc_pixel_metric, aupro_pixel_metric = metrics
-
-    # reset
-    auroc_image_metric.reset(); auroc_pixel_metric.reset(); aupro_pixel_metric.reset()
+def evaluate(model, dataloader, device: str = 'cpu'):
+    # targets and outputs
+    image_targets = []
+    image_masks = []
+    anomaly_score = []
+    anomaly_map = []
 
     model.eval()
     with torch.no_grad():
@@ -191,27 +182,31 @@ def evaluate(model, dataloader, criterion, log_interval, metrics: list, device: 
             # predict
             outputs = model(inputs)
             outputs = F.softmax(outputs, dim=1)
-            anomaly_score = torch.topk(torch.flatten(outputs[:,1,:], start_dim=1), 100)[0].mean(dim=1)
+            anomaly_score_i = torch.topk(torch.flatten(outputs[:,1,:], start_dim=1), 100)[0].mean(dim=1)
 
-            # update metrics
-            auroc_image_metric.update(
-                preds  = anomaly_score.cpu(), 
-                target = targets.cpu()
-            )
-            auroc_pixel_metric.update(
-                preds  = outputs[:,1,:].cpu(),
-                target = masks.cpu()
-            )
-            aupro_pixel_metric.update(
-                preds   = outputs[:,1,:].cpu(),
-                target  = masks.cpu()
-            ) 
-
+            # stack targets and outputs
+            image_targets.extend(targets.cpu().tolist())
+            image_masks.extend(masks.cpu().numpy())
+            
+            anomaly_score.extend(anomaly_score_i.cpu().tolist())
+            anomaly_map.extend(outputs[:,1,:].cpu().numpy())
+            
     # metrics    
+    image_masks = np.array(image_masks)
+    anomaly_map = np.array(anomaly_map)
+    
+    auroc_image = roc_auc_score(image_targets, anomaly_score)
+    auroc_pixel = roc_auc_score(image_masks.reshape(-1).astype(int), anomaly_map.reshape(-1))
+    all_fprs, all_pros = compute_pro(
+        anomaly_maps      = anomaly_map,
+        ground_truth_maps = image_masks
+    )
+    aupro = trapezoid(all_fprs, all_pros)
+    
     metrics = {
-        'AUROC-image':auroc_image_metric.compute().item(),
-        'AUROC-pixel':auroc_pixel_metric.compute().item(),
-        'AUPRO-pixel':aupro_pixel_metric.compute().item()
+        'AUROC-image':auroc_image,
+        'AUROC-pixel':auroc_pixel,
+        'AUPRO-pixel':aupro
 
     }
 

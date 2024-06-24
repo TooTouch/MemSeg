@@ -1,8 +1,6 @@
 {
-	"best_step": 3199,
-	"eval_AUROC-image": 0.9770833849906921,
-	"eval_AUROC-pixel": 0.7178097367286682,
-	"eval_AUPRO-pixel": 0.6686205267906189,
-	"_timestamp": 1667306200,
-	"_runtime": 2532
+	"best_step": 4199,
+	"eval_AUROC-image": 0.965,
+	"eval_AUROC-pixel": 0.7629001885386938,
+	"eval_AUPRO-pixel": 0.8606269093140095
 }

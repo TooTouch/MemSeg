@@ -1,16 +1,16 @@
 # MemSeg
-Unofficial Re-implementation for [MemSeg: A semi-supervised method for image surface defect detection using differences and commonalities](https://arxiv.org/abs/2205.00908)
+Unofficial re-implementation for [MemSeg: A semi-supervised method for image surface defect detection using differences and commonalities](https://arxiv.org/abs/2205.00908)
 
 # Environments
 
 - Docker image: nvcr.io/nvidia/pytorch:20.12-py3
 
 ```
-anomalib
-opencv
-einops
-timm
-wandb
+einops==0.5.0
+timm==0.5.4
+wandb==0.12.17
+omegaconf
+imgaug==0.4.0
 ```
 
 
@@ -36,8 +36,10 @@ wandb
 
 # Run
 
+**Example**
+
 ```bash
-python main.py --yaml_config ./configs/capsule.yaml
+python main.py configs=configs.yaml DATASET.target=bottle
 ```
 
 ## Demo
@@ -50,24 +52,26 @@ voila "[demo] model inference.ipynb" --port ${port} --Voila.ip ${ip}
 
 # Results
 
-TBD
+- **Backbone**: ResNet18
 
-|    | target     |   AUROC-image |   AUROC-pixel |   AUPRO-pixel |
-|---:|:-----------|--------------:|--------------:|--------------:|
-|  0 | leather    |        100    |         93.93 |         90.44 |
-|  1 | wood       |         99.12 |         92.71 |         84.96 |
-|  2 | carpet     |         91.33 |         91.32 |         78.34 |
-|  3 | capsule    |         95.77 |         88.55 |         81.56 |
-|  4 | cable      |         92.41 |         81.77 |         64.45 |
-|  5 | metal_nut  |         99.9  |         71.13 |         79.92 |
-|  6 | tile       |        100    |         98.1  |         95.41 |
-|  7 | grid       |         96.57 |         76.78 |         59.63 |
-|  8 | bottle     |         99.92 |         95    |         89.95 |
-|  9 | zipper     |         97.58 |         93.76 |         83.94 |
-| 10 | transistor |         97.71 |         71.78 |         66.86 |
-| 11 | hazelnut   |         95.29 |         91.73 |         87.83 |
-| 12 | pill       |         83.69 |         91.91 |         72.62 |
-|    | **Average**    |         96.1  |         87.57 |         79.69 |
+| target     |   AUROC-image |   AUROC-pixel |   AUPRO-pixel |
+|:-----------|--------------:|--------------:|--------------:|
+| leather    |        100    |         98.83 |         99.09 |
+| pill       |         97.05 |         98.29 |         97.96 |
+| carpet     |         99.12 |         97.54 |         97.02 |
+| hazelnut   |        100    |         97.78 |         99    |
+| tile       |         99.86 |         99.38 |         98.81 |
+| cable      |         92.5  |         82.3  |         87.31 |
+| toothbrush |        100    |         99.28 |         98.56 |
+| transistor |         96.5  |         76.29 |         86.06 |
+| zipper     |         99.95 |         97.94 |         97.26 |
+| metal_nut  |         99.46 |         88.48 |         95    |
+| grid       |         99.83 |         98.37 |         98.53 |
+| bottle     |        100    |         98.79 |         98.36 |
+| capsule    |         95.41 |         98.43 |         97.73 |
+| screw      |         94.86 |         95.08 |         94    |
+| wood       |        100    |         97.54 |         97.62 |
+| **Average**    |         98.3  |         94.96 |         96.15 |
 
 # Citation
 
